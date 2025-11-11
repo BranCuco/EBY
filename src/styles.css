@@ -1,0 +1,194 @@
+:root{
+  --bg: #fff;
+  --fg: #000;
+  --muted: #666;
+}
+*{box-sizing:border-box}
+body{font-family:Inter,Segoe UI,Arial;background:var(--bg);color:var(--fg);margin:0;padding:0}
+.app-root{max-width:1000px;margin:24px auto;padding:16px}
+/* prevent horizontal scroll across the app */
+html, body, .app-root, .workspace { overflow-x: hidden; }
+header h1{font-size:1.2rem;margin:0 0 12px}
+main{display:flex;gap:16px}
+.left{flex:1}
+.right{width:360px}
+.report-form,label{display:block}
+.report-form textarea{width:100%;padding:8px;margin-top:6px}
+.report-form select{width:100%;padding:6px;margin-top:6px}
+.form-actions{margin-top:8px}
+button{background:#000;color:#fff;border:none;padding:8px 12px;cursor:pointer}
+button:active{transform:translateY(1px)}
+.report-list ul{list-style:none;padding:0;margin:8px 0}
+.report-item{border:1px solid #000;padding:8px;margin-bottom:8px}
+.report-item.low{border-left:6px solid #666}
+.report-item.medium{border-left:6px solid #000}
+.report-item.high{border-left:6px solid #000}
+.report-item .meta{display:flex;justify-content:space-between;font-size:0.85rem;color:var(--muted)}
+.map-placeholder{border:1px dashed #000;padding:8px;text-align:center}
+.map-inner{height:220px;background:#f8f8f8;color:#000;display:flex;align-items:center;justify-content:center}
+footer{text-align:center;margin-top:12px;color:var(--muted)}
+
+input[type="file"]{margin-top:6px}
+.coords{display:flex;gap:8px}
+.coords label{flex:1}
+.photo-preview img{max-width:100%;height:auto;border:1px solid #000;margin-top:6px}
+.form-error{background:#000;color:#fff;padding:6px;margin-bottom:8px}
+.location{font-size:0.9rem;color:var(--muted);margin-top:6px}
+.photo-thumb img{max-width:120px;height:auto;border:1px solid #000;margin-top:6px;cursor:pointer}
+.image-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:24px;z-index:9999}
+.image-modal img{max-width:100%;max-height:100%;border:4px solid #fff}
+.status-badge{padding:4px 8px;border-radius:6px;background:#eee;color:#222;font-weight:700;font-size:0.75rem}
+.status-badge.reported{background:#ffd; color:#444}
+.status-badge.in_progress{background:#def; color:#045}
+.status-badge.resolved{background:#e6f6e9; color:#0b672a}
+.comments{margin-top:6px;color:#222}
+.address{font-size:0.95rem;color:#444;margin-top:6px}
+.image-row .photo-thumb img{max-width:140px;height:auto;border:1px solid #ddd;background:#fff}
+.report-controls select{padding:6px;border:1px solid #ddd;border-radius:6px}
+.report-controls small{color:var(--muted);font-size:0.85rem}
+.selected-location{margin-top:8px;padding:8px;border:1px dashed #000}
+.selected-location.muted{color:var(--muted);font-size:0.95rem}
+.map-placeholder{width:100%}
+
+/* Ensure Leaflet container always has visible height when used anywhere */
+.map-placeholder{position:relative}
+.map-placeholder .leaflet-container{width:100% !important; height:360px !important; min-height:280px}
+
+/* Specific create page: make map square and large enough */
+.create-report-page .map-placeholder{aspect-ratio:1/1; max-width:720px}
+.create-report-page .map-placeholder .leaflet-container{height:100% !important}
+
+.login-root{display:flex;align-items:center;justify-content:center;height:70vh}
+.login-form{width:320px;border:1px solid #000;padding:12px}
+.login-form label{display:block;margin-top:8px}
+.auth-area{position:absolute;right:24px;top:18px}
+
+.tabs{display:flex;gap:8px;margin-bottom:8px}
+.tabs button{flex:1;padding:6px;border:1px solid #000;background:#fff;cursor:pointer}
+.tabs button.active{background:#000;color:#fff}
+
+.login-form{width:360px;border:1px solid #000;padding:18px;background:#fff}
+.login-form .field{margin-bottom:10px}
+.login-form label{font-weight:600;display:block;margin-bottom:6px}
+.login-form input{width:100%;padding:8px;border:1px solid #aaa}
+.field-error{color:#900;margin-top:4px;font-size:0.9rem}
+.password-row{display:flex;gap:8px}
+.password-row input{flex:1}
+.small{background:#eee;color:#000;padding:6px;border:1px solid #aaa;cursor:pointer}
+.small:active{transform:translateY(1px)}
+.pw-strength{font-size:0.85rem;color:var(--muted);margin-top:6px}
+.form-actions{display:flex;justify-content:flex-end}
+.form-actions button{padding:8px 14px}
+
+/* Auth card styles */
+.auth-page{display:flex;align-items:center;justify-content:center;height:88vh;padding:18px}
+.auth-card{width:360px;border:1px solid #e6e6e6;padding:22px;background:#fff;border-radius:8px;box-shadow:0 6px 18px rgba(25,25,25,0.06)}
+.auth-header{display:flex;flex-direction:column;justify-content:center;align-items:center;margin-bottom:14px;gap:6px}
+.auth-header h3{margin:0;text-align:center;font-weight:700}
+.muted{color:var(--muted);font-size:0.9rem}
+.link{background:none;border:none;color:#19b5a7;cursor:pointer;padding:0}
+.auth-body{padding:6px 0}
+.auth-form{display:flex;flex-direction:column;gap:12px}
+.input{padding:12px;border:1px solid #e0e0e0;border-radius:6px;background:#fafafa}
+.checkbox{font-size:0.95rem;display:flex;align-items:center;gap:8px}
+.primary-btn{background:#14b39a;color:#fff;border:none;padding:12px 14px;font-weight:700;cursor:pointer;border-radius:6px;width:100%;box-shadow:0 2px 0 rgba(0,0,0,0.04)}
+.auth-footer{text-align:center;margin-top:10px}
+.auth-card .form-error{background:#f8d7da;color:#842029;padding:8px;margin-bottom:8px;border:1px solid #f5c2c7;border-radius:6px}
+
+.auth-logo{display:block;margin:0 auto 4px;width:200px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd}
+
+/* Password row: keep button flush to the right */
+.password-row{display:flex;gap:8px}
+.password-row input{flex:1}
+.small{background:#f0f0f0;color:#333;padding:8px;border:1px solid #ddd;cursor:pointer;border-radius:6px}
+.small:active{transform:translateY(1px)}
+.show-btn{min-width:84px;padding:8px 10px}
+
+/* Muted text and footer link centered */
+.auth-footer{text-align:center;margin-top:12px}
+.auth-footer .link{color:#0b7b6f}
+
+/* Sidebar layout */
+.app-with-sidebar .workspace{display:flex;gap:16px}
+.sidebar{width:220px;border-right:1px solid #e6e6e6;padding:22px 14px;background:#f4fbfb}
+.sidebar{position:fixed;left:0;top:0;height:100vh;box-shadow:2px 0 12px rgba(0,0,0,0.06);z-index:1000}
+.profile{text-align:center;padding-bottom:12px}
+.profile-avatar{width:72px;height:72px;border-radius:8px}
+.profile-name{font-weight:700;margin-top:8px;color:#0b4461;font-size:0.98rem}
+.profile-email{font-size:0.85rem;color:#2b4b4f;opacity:0.9}
+.nav{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.nav-item{background:none;border:none;text-align:left;padding:10px 12px;cursor:pointer;border-radius:6px;color:#23484b;font-weight:600}
+.nav-item:hover{background:#e9f7f6}
+.nav-item.active{background:#dff3f1}
+.content{flex:1;padding:18px;margin-left:0}
+.app-with-sidebar header{margin-left:220px}
+.app-with-sidebar footer{margin-left:220px}
+.app-with-sidebar .workspace{margin-left:220px}
+.reports-page{display:flex;gap:16px}
+.reports-page .left{flex:1}
+.reports-page .right{width:420px}
+
+/* Report section: two-column layout (list left, map right) */
+.report-section{display:flex;gap:16px;align-items:flex-start}
+.report-list-column{flex:1;min-width:200px;max-height:calc(100vh - 220px);overflow-y:auto;overflow-x:hidden;padding-right:8px}
+.report-map-column{
+  /* make the map column responsive but allow the placeholder to control aspect */
+  flex: 0 0 48%;
+  width: 48%;
+  max-width: 640px;
+  box-sizing: border-box;
+}
+
+.report-map-column .map-placeholder{
+  width:100%;
+  /* enforce square using aspect-ratio, but cap with max-height to avoid overflow */
+  aspect-ratio: 1 / 1;
+  max-height: calc(100vh - 160px);
+  height: auto;
+  overflow:hidden;
+  display:block;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+/* Ensure the Leaflet container fills the parent area */
+.report-map-column .map-placeholder .leaflet-container{height:100% !important;width:100% !important;max-width:100%}
+
+/* Force report item text to wrap instead of expanding horizontally */
+.report-item, .report-item .desc, .report-item .address, .report-item .comments { word-break: break-word; overflow-wrap: anywhere; }
+
+/* Make the two-column layout responsive */
+@media (max-width:900px){
+  .report-section{flex-direction:column}
+  .report-map-column{width:100%;max-width:100%}
+  .report-list-column{max-height:none}
+  .app-with-sidebar .workspace{margin-left:220px}
+}
+
+/* Vehículos y trabajadores styles */
+.vw-grid{padding:8px}
+.vw-columns{display:flex;gap:18px}
+.vw-column{flex:1;min-width:260px}
+.vw-column .panel{border:1px solid #e6e6e6;padding:12px;border-radius:6px;background:#fff}
+.vw-column h3{margin-top:0}
+.vw-item{padding:10px;border-bottom:1px solid #f0f0f0;cursor:pointer}
+.vw-item:hover{background:#fafafa}
+.vw-item.active{background:#f0fbfa}
+.vw-item-head{display:flex;justify-content:space-between;align-items:center}
+.vw-item-sub{font-size:0.9rem;margin-top:6px}
+.vw-item-details{margin-top:8px;padding-top:8px;border-top:1px dashed #eee;color:#333}
+.vw-column .list{max-height:60vh;overflow:auto;margin-top:8px}
+
+@media (max-width:900px){
+  .vw-columns{flex-direction:column}
+  .vw-column .list{max-height:none}
+}
+
+/* Create report page styles */
+.create-report-page{padding:12px}
+.create-report-form{max-width:720px}
+.create-report-form textarea{width:100%;min-height:100px;padding:8px;border:1px solid #ddd}
+.create-report-form input[type="file"]{margin-top:6px}
+.create-report-form select{padding:8px;margin-top:6px}
+.create-report-form label{display:block;margin-top:10px}
+.create-report-page .map-placeholder{margin-top:8px}
