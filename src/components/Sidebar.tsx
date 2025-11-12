@@ -28,6 +28,7 @@ export default function Sidebar({ user, email, currentPage, onNavigate }: Props)
         <button className={`nav-item ${currentPage === 'reportes' ? 'active' : ''}`} onClick={() => onNavigate('reportes')}>Reportes</button>
         <button className={`nav-item ${currentPage === 'crear' ? 'active' : ''}`} onClick={() => onNavigate('crear')}>Crear reporte (prueba)</button>
         <button className={`nav-item ${currentPage === 'vehiculos' ? 'active' : ''}`} onClick={() => onNavigate('vehiculos')}>Vehículos y trabajadores</button>
+        <button className={`nav-item ${currentPage === 'metrics' ? 'active' : ''}`} onClick={() => onNavigate('metrics')}>Métricas</button>
       </nav>
     </aside>
   )

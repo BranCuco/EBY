@@ -95,7 +95,17 @@ input[type="file"]{margin-top:6px}
 .auth-footer{text-align:center;margin-top:10px}
 .auth-card .form-error{background:#f8d7da;color:#842029;padding:8px;margin-bottom:8px;border:1px solid #f5c2c7;border-radius:6px}
 
-.auth-logo{display:block;margin:0 auto 4px;width:200px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd}
+.auth-logo{
+  display:block;
+  margin:0 auto 8px;
+  width:220px;        /* preferred display width */
+  max-width:100%;
+  height:auto;        /* preserve aspect ratio and avoid cropping */
+  max-height:120px;   /* cap height to keep layout stable */
+  object-fit:contain; /* ensure entire image is visible */
+  border-radius:6px;
+  border:1px solid #ddd;
+}
 
 /* Password row: keep button flush to the right */
 .password-row{display:flex;gap:8px}

@@ -3,12 +3,42 @@ import ReportList from './components/ReportList'
 import MapPlaceholder from './components/MapPlaceholder'
 import Login from './components/Login'
 import Sidebar from './components/Sidebar'
+import Metrics from './components/Metrics'
 import VehiculosTrabajadores from './components/VehiculosTrabajadores'
 import TestCreateReport from './components/TestCreateReport'
 import { readAuth, clearAuth } from './utils/auth'
 import type { Report, Location as Loc, Auth } from './types'
 
 const API_BASE = 'https://baches-yucatan-1.onrender.com/api'
+const REPORTS_CACHE_KEY = 'baches-reports-cache'
+const REPORTS_CACHE_TTL = 1000 * 60 * 60 * 6 // 6 hours
+
+type ReportsCache = {
+  ts: number
+  items: any[]
+}
+
+function readCachedReports(): any[] | null {
+  try {
+    const raw = localStorage.getItem(REPORTS_CACHE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as ReportsCache
+    if (!parsed || !parsed.ts || !Array.isArray(parsed.items)) return null
+    if (Date.now() - parsed.ts > REPORTS_CACHE_TTL) return null
+    return parsed.items
+  } catch (e) {
+    return null
+  }
+}
+
+function writeCachedReports(items: any[]) {
+  try {
+    const payload: ReportsCache = { ts: Date.now(), items }
+    localStorage.setItem(REPORTS_CACHE_KEY, JSON.stringify(payload))
+  } catch (e) {
+    // ignore cache errors
+  }
+}
 
 export default function App(): JSX.Element {
   const [reports, setReports] = useState<Report[]>([])
@@ -19,7 +49,37 @@ export default function App(): JSX.Element {
   useEffect(() => {
     try {
       const a = readAuth()
-      if (a) setAuth(a)
+      if (!a) return
+
+      // Optimistically set auth so the app appears logged in immediately
+      setAuth(a)
+
+      // Validate token in background (non-blocking). If invalid, clear local auth.
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 5000) // 5s
+
+      ;(async () => {
+        try {
+          const res = await fetch(`${API_BASE}/auth/profile`, {
+            headers: { Authorization: `Bearer ${a.token}` },
+            signal: controller.signal
+          })
+          if (!res.ok) {
+            // Token invalid or expired — clear and force login
+            clearAuth()
+            setAuth(null)
+            return
+          }
+          // optionally update user info from profile
+          const profile = await res.json().catch(() => null)
+          if (profile && profile.email) setAuth({ token: a.token, user: profile.email })
+        } catch (err: any) {
+          if (err.name === 'AbortError') console.warn('Auth validation timeout')
+          else console.warn('Auth validation failed', err)
+        } finally {
+          clearTimeout(timeout)
+        }
+      })()
     } catch (e) {
       console.warn('Error reading auth', e)
     }
@@ -54,6 +114,8 @@ export default function App(): JSX.Element {
         createdAt: r.createdAt || r.date || new Date().toISOString()
       }))
       setReports(normalized)
+      // persist a recent copy for faster perceived loads on next visit
+      try { writeCachedReports(normalized) } catch {}
     } catch (e) {
       console.error('Error loading reports from API', e)
       setReports([])
@@ -61,6 +123,14 @@ export default function App(): JSX.Element {
   }, [auth])
 
   useEffect(() => {
+    if (!auth) {
+      setReports([])
+      return
+    }
+    // show cached reports immediately for better perceived performance,
+    // then refresh from the server in background
+    const cached = readCachedReports()
+    if (cached) setReports(cached as any[])
     loadReports()
   }, [auth, loadReports])
 
@@ -148,6 +218,12 @@ export default function App(): JSX.Element {
           {currentPage === 'vehiculos' && (
             <div className="vehiculos-page">
               <VehiculosTrabajadores />
+            </div>
+          )}
+
+          {currentPage === 'metrics' && (
+            <div className="metrics-page">
+              <Metrics token={auth.token} apiBase={API_BASE} reports={reports} />
             </div>
           )}
         </main>
