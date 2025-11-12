@@ -1,4 +1,4 @@
-# Frontend - Escaneo de Baches (Mockup)
+# Frontend - Escaneo de Baches 
 
 Proyecto mockup en React + Vite (blanco y negro) para registrar baches localmente.
 
@@ -26,7 +26,3 @@ Qué contiene
 - `src/` - código React: App, componentes (ReportForm, ReportList, MapPlaceholder) y `styles.css`.
 - Datos guardados en `localStorage` bajo la clave `baches-reports`.
 
-Siguientes pasos recomendados
-- Integrar backend Node.js + PostgreSQL para persistencia.
-- Añadir mapa real (Leaflet o Mapbox) y permitir geolocalización.
-- Subida de fotos y validaciones.
