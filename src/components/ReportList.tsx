@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import type { Report } from '../types'
+import { ProgressStatus } from '../types'
 
 type DetailedReport = Report & {
-  status?: string
+  status?: ProgressStatus
   comments?: string
   street?: string
   neighborhood?: string
@@ -56,6 +57,23 @@ export default function ReportList({ reports, onDelete }: Props) {
     if (v.includes('med')) return 'medium'
     if (v.includes('high') || v.includes('alt')) return 'high'
     return null
+  }
+
+  function mapStatus(s?: ProgressStatus | string) {
+    if (!s) return '—'
+    switch (s) {
+      case ProgressStatus.not_started:
+        return 'No iniciado'
+      case ProgressStatus.in_progress:
+        return 'En progreso'
+      case ProgressStatus.completed:
+        return 'Completado'
+      case ProgressStatus.on_hold:
+        return 'En pausa'
+      default:
+        // fallback: show raw string (replace underscores for readability)
+        return String(s).replace(/_/g, ' ')
+    }
   }
 
   const filtered = reports.filter(r => {
@@ -118,7 +136,7 @@ export default function ReportList({ reports, onDelete }: Props) {
             <div className="meta">
               <div style={{display:'flex',alignItems:'center',gap:12}}>
                 <strong>{r.severity.toUpperCase()}</strong>
-                <span className={`status-badge ${r.status || ''}`}>{(r.status || '').toUpperCase() || '—'}</span>
+                <span className={`status-badge ${r.status || ''}`}>{mapStatus(r.status)}</span>
               </div>
               <time>{formatDate(r.createdAt)}</time>
             </div>

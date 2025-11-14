@@ -1,0 +1,91 @@
+DOCUMENTACIÓN TÉCNICA - Proyecto EBY
+Fecha: 14 de noviembre de 2025
+
+1. Resumen
+- Nombre del repositorio: EBY (frontend de registro/visualización de baches)
+- Propósito: Interfaz web para listar, visualizar en mapa y gestionar reportes de incidencias (baches). Funciona como mockup/dashbord que consume una API remota y guarda una copia cacheada en `localStorage`.
+
+2. Stack técnico
+- Lenguaje: TypeScript
+- Librería UI: React 18
+- Bundler / dev server: Vite
+- Mapas: Leaflet + React-Leaflet
+- PWA: `service-worker.js` (registro en `src/main.tsx`)
+
+3. Estructura del proyecto (carpeta `src/`)
+- `main.tsx`: punto de entrada. Monta `App` y registra el service worker cuando el navegador lo soporte.
+- `App.tsx`: contenedor principal / layout. Maneja autenticación mínima, carga de reportes desde API, cache en `localStorage`, paginación/selección de vistas y routing interno simple por estado local.
+- `types.ts`: tipos TypeScript compartidos (ej. `Report`, `Location`, `Auth`, `ProgressStatus`).
+- `service-worker.js`: fichero de worker para PWA (registro y lógica básica, si aplica).
+- `styles.css`: estilos globales y reglas para componentes.
+- `components/`: conjunto de componentes reutilizables
+  - `ReportList.tsx`: lista de reportes (filtrado/ordenación). Muestra severidad, fecha, dirección, imágenes y estado (`status`).
+  - `ReportForm.tsx`: formulario para crear/editar reportes (si existe). Debe proveer `status` por defecto al crear.
+  - `TestCreateReport.tsx`: utilidad para crear reportes de ejemplo / pruebas.
+  - `MapPlaceholder.tsx`: componente que muestra puntos de reportes (mock o integración con react-leaflet).
+  - `Login.tsx`, `Sidebar.tsx`, `Metrics.tsx`, `VehiculosTrabajadores.tsx`: componentes auxiliares para la UI y métricas.
+- `pages/`: contenedores de página (ej. `LoginPage.tsx`).
+- `utils/`: utilidades (ej. `auth.ts` que lee/limpia credenciales de `localStorage`).
+
+4. Tipos y modelos
+- `Location`: { lat: number, lng: number }
+- `Report`: campos principales:
+  - `id: string`
+  - `description: string`
+  - `severity: string` (ej. 'low'|'medium'|'high' ó variantes en español/ingles)
+  - `status?: ProgressStatus` (nuevo campo opcional para flujo)
+  - `location?: Location | null`
+  - `photo?: string | null`
+  - `createdAt: string` (ISO)
+- `ProgressStatus` (enum en `src/types.ts`):
+  - `not_started` — No iniciado
+  - `in_progress` — En progreso
+  - `completed` — Completado
+  - `on_hold` — En pausa
+
+5. Flujo de datos y comportamiento clave
+- Autenticación: `App.tsx` usa `utils/auth.ts` para leer token de `localStorage` y valida el perfil contra `API_BASE`.
+- Carga de reportes: `App.tsx` solicita `GET ${API_BASE}/reports` con `Authorization` y normaliza la respuesta (mapea campos, imágenes y ubicación). También usa cache local (`REPORTS_CACHE_KEY`) para carga rápida.
+- Mutaciones: El frontend implementa eliminación (`DELETE /reports/:id`) cuando el usuario está autenticado; creación de reportes se hace desde `TestCreateReport` o `ReportForm` según diseño.
+- Cache: `writeCachedReports` guarda una copia con timestamp para acelerar recargas (TTL de 6 horas por defecto).
+
+6. Comandos útiles (según `package.json`)
+- Instalar dependencias:
+  npm install
+- Desarrollo (dev server):
+  npm run dev
+- Build producción:
+  npm run build
+- Previsualizar build:
+  npm run preview
+- Verificación de tipos:
+  npm run type-check
+
+7. Consideraciones de integración
+- Consistencia de campos: la app normaliza campos entrantes (por ejemplo `postalCode`, `photo` vs `images`, `latitude`/`longitude`). Asegurarse que el backend exponga keys previstas o transformar en cliente.
+- `status`/flujo: el enum `ProgressStatus` usa `snake_case` (`in_progress`). Si la API devuelve otros formatos, normalizar al recibir.
+
+8. Estética y UX sugerida
+- Añadir estilos para `status-badge` en `styles.css` con colores por estado (ej. gris, azul, verde, naranja) para mejorar visibilidad.
+- Añadir filtros por `status` en `ReportList` y posibilidad de acciones rápidas (ej. cambiar estado a `in_progress` o `completed`).
+
+9. Seguridad y permisos
+- Todas las llamadas sensibles (eliminación, creación) requieren `Authorization: Bearer <token>`.
+- Validaciones: sanitizar y validar datos antes de enviarlos al backend.
+
+10. Tests y verificación
+- No hay tests automatizados incluidos en el repositorio actualmente. Recomendado:
+  - Añadir pruebas unitarias para utilidades de normalización y para `ReportList` (renderizado).
+  - Añadir verificación de tipos con `npm run type-check` en CI.
+
+11. Tareas pendientes / próximos pasos
+- Enrutamiento
+- Consumir endpoints de vehiculos y trabajadores
+- Diseño 
+- roles
+-
+
+12. Contacto y notas finales
+- Archivo: `TECHNICAL_DOCUMENTATION.txt` 
+
+Fin de la documentación.

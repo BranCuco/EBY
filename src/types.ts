@@ -3,10 +3,18 @@ export interface Location {
   lng: number
 }
 
+export enum ProgressStatus {
+  not_started = 'not_started',
+  in_progress = 'in_progress',
+  completed = 'completed',
+  on_hold = 'on_hold',
+}
+
 export interface Report {
   id: string
   description: string
   severity: string
+  status?: ProgressStatus
   location?: Location | null
   photo?: string | null
   createdAt: string
