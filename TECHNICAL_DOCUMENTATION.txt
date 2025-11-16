@@ -3,7 +3,7 @@ Fecha: 14 de noviembre de 2025
 
 1. Resumen
 - Nombre del repositorio: EBY (frontend de registro/visualización de baches)
-- Propósito: Interfaz web para listar, visualizar en mapa y gestionar reportes de incidencias (baches). Funciona como mockup/dashbord que consume una API remota y guarda una copia cacheada en `localStorage`.
+- Propósito: Interfaz web para listar, visualizar en mapa y gestionar reportes de incidencias (baches). Funciona como dashbord que consume una API remota y guarda una copia cacheada en `localStorage`.
 
 2. Stack técnico
 - Lenguaje: TypeScript
@@ -83,7 +83,7 @@ Fecha: 14 de noviembre de 2025
 - Consumir endpoints de vehiculos y trabajadores
 - Diseño 
 - roles
--
+- 
 
 12. Contacto y notas finales
 - Archivo: `TECHNICAL_DOCUMENTATION.txt` 

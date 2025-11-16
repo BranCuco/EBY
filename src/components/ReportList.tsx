@@ -11,6 +11,20 @@ type DetailedReport = Report & {
   state?: string
   postalCode?: string
   images?: string[]
+  // optional relations that may come from the API
+  reportedByVehicle?: {
+    id?: string
+    licensePlate?: string
+    plate?: string
+    model?: string
+    brand?: string
+  }
+  reportedByWorker?: {
+    id?: string
+    name?: string
+    lastname?: string
+    email?: string
+  }
 }
 
 function formatDate(iso: string) {
@@ -94,6 +108,26 @@ export default function ReportList({ reports, onDelete }: Props) {
         return String(a.description || '').localeCompare(String(b.description || ''))
       case 'alpha_desc':
         return String(b.description || '').localeCompare(String(a.description || ''))
+      case 'worker_asc': {
+        const an = ((a.reportedByWorker?.name || '') + ' ' + (a.reportedByWorker?.lastname || '')).trim()
+        const bn = ((b.reportedByWorker?.name || '') + ' ' + (b.reportedByWorker?.lastname || '')).trim()
+        return an.localeCompare(bn)
+      }
+      case 'worker_desc': {
+        const an = ((a.reportedByWorker?.name || '') + ' ' + (a.reportedByWorker?.lastname || '')).trim()
+        const bn = ((b.reportedByWorker?.name || '') + ' ' + (b.reportedByWorker?.lastname || '')).trim()
+        return bn.localeCompare(an)
+      }
+      case 'vehicle_asc': {
+        const av = (a.reportedByVehicle?.licensePlate || a.reportedByVehicle?.plate || '').toString()
+        const bv = (b.reportedByVehicle?.licensePlate || b.reportedByVehicle?.plate || '').toString()
+        return av.localeCompare(bv)
+      }
+      case 'vehicle_desc': {
+        const av = (a.reportedByVehicle?.licensePlate || a.reportedByVehicle?.plate || '').toString()
+        const bv = (b.reportedByVehicle?.licensePlate || b.reportedByVehicle?.plate || '').toString()
+        return bv.localeCompare(av)
+      }
       case 'severity_asc':
         return severityRank(a.severity) - severityRank(b.severity)
       case 'severity_desc':
@@ -124,6 +158,10 @@ export default function ReportList({ reports, onDelete }: Props) {
             <option value="date_asc">Fecha (más antiguos)</option>
             <option value="alpha_asc">A → Z (descripción)</option>
             <option value="alpha_desc">Z → A (descripción)</option>
+              <option value="worker_asc">Trabajador A → Z</option>
+              <option value="worker_desc">Trabajador Z → A</option>
+              <option value="vehicle_asc">Vehículo 0 → 9 (placa)</option>
+              <option value="vehicle_desc">Vehículo 9 → 0 (placa)</option>
             <option value="severity_desc">Severidad (Alta → Baja)</option>
             <option value="severity_asc">Severidad (Baja → Alta)</option>
           </select>
@@ -155,6 +193,25 @@ export default function ReportList({ reports, onDelete }: Props) {
 
             {r.location && (
               <div className="location">Ubicación: {r.location.lat}, {r.location.lng}</div>
+            )}
+
+            {r.reportedByVehicle && (
+              <div className="reported-by-vehicle" style={{marginTop:8}}>
+                <strong>Reportado por vehículo:</strong>
+                <div>
+                  {r.reportedByVehicle.licensePlate || r.reportedByVehicle.plate || ''} {r.reportedByVehicle.model ? `— ${r.reportedByVehicle.model}` : ''}
+                </div>
+              </div>
+            )}
+
+            {r.reportedByWorker && (
+              <div className="reported-by-worker" style={{marginTop:8}}>
+                <strong>Reportado por trabajador:</strong>
+                <div>
+                  {((r.reportedByWorker.name || '') + (r.reportedByWorker.lastname ? ' ' + r.reportedByWorker.lastname : '')).trim() || r.reportedByWorker.email || '—'}
+                </div>
+                {r.reportedByWorker.email && <div style={{fontSize:12,color:'#666'}}>{r.reportedByWorker.email}</div>}
+              </div>
             )}
 
             {r.images && r.images.length > 0 && (

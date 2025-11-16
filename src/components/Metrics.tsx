@@ -23,8 +23,10 @@ export default function Metrics({ token, apiBase = 'https://baches-yucatan-1.onr
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // if consumer passed reports, don't fetch
-    if (initialReports && initialReports.length) return
+    // If consumer passed reports (even an empty array), trust the parent and don't fetch here.
+    // Previously we only skipped fetch when initialReports had length; that caused a fetch
+    // when App passed an empty array (initial state) and led to the abort/timeout message.
+    if (initialReports !== undefined) return
 
     if (!token) {
       setError('No hay token disponible para cargar métricas.')
@@ -68,10 +70,60 @@ export default function Metrics({ token, apiBase = 'https://baches-yucatan-1.onr
     return () => { cancelled = true; clearTimeout(timeout); controller.abort() }
   }, [token, apiBase, initialReports])
 
+  // If parent passes reports (initialReports), keep local state in sync
+  useEffect(() => {
+    if (initialReports !== undefined) setReports(initialReports)
+  }, [initialReports])
+
   const total = reports.length
   const bySeverity = countBy(reports, (r) => (r.severity || 'unknown').toString())
   const byStatus = countBy(reports, (r) => (r as any).status || 'unknown')
   const byCity = countBy(reports, (r) => (r as any).city || 'Sin ciudad')
+
+  // Distribution by hour (0-23)
+  const hours = new Array(24).fill(0)
+  // Days: Sunday(0) ... Saturday(6)
+  const days = new Array(7).fill(0)
+  for (const r of reports) {
+    try {
+      const d = new Date(r.createdAt)
+      if (!isNaN(d.getTime())) {
+        const h = d.getHours()
+        const wd = d.getDay()
+        hours[h] = (hours[h] || 0) + 1
+        days[wd] = (days[wd] || 0) + 1
+      }
+    } catch (e) {
+      // ignore malformed dates
+    }
+  }
+
+  const maxHour = Math.max(...hours, 1)
+  const maxDay = Math.max(...days, 1)
+
+  // Top workers and vehicles
+  function topByKey(getKey: (r: Report) => string | null, top = 10) {
+    const m = new Map<string, number>()
+    for (const r of reports) {
+      const k = getKey(r)
+      if (!k) continue
+      m.set(k, (m.get(k) || 0) + 1)
+    }
+    return Array.from(m.entries()).sort((a, b) => b[1] - a[1]).slice(0, top)
+  }
+
+  const topWorkers = topByKey((r) => {
+    const w = (r as any).reportedByWorker
+    if (!w) return null
+    const name = ((w.name || '') + (w.lastname ? ' ' + w.lastname : '')).trim()
+    return name || w.email || null
+  })
+
+  const topVehicles = topByKey((r) => {
+    const v = (r as any).reportedByVehicle
+    if (!v) return null
+    return (v.licensePlate || v.plate || v.id || null)
+  })
 
   return (
     <div className="page metrics-page">
@@ -111,6 +163,69 @@ export default function Metrics({ token, apiBase = 'https://baches-yucatan-1.onr
           <h3>Ciudades principales</h3>
           <ol>
             {byCity.slice(0,8).map(([city,v]) => <li key={city}>{city} — {v}</li>)}
+          </ol>
+        </div>
+      </div>
+
+      {/* New row: hourly / weekday distributions */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginTop:16}}>
+        <div className="panel">
+          <h3>Distribución por hora del día</h3>
+          <div style={{display:'flex',flexDirection:'column',gap:6}}>
+            {hours.map((count, h) => {
+              const pct = Math.round((count / maxHour) * 100)
+              return (
+                <div key={h} style={{display:'flex',alignItems:'center',gap:8}}>
+                  <div style={{width:40}}><small>{String(h).padStart(2,'0')}:00</small></div>
+                  <div style={{flex:1,background:'#eee',height:12,borderRadius:6,overflow:'hidden'}}>
+                    <div style={{width:`${pct}%`,height:'100%',background:'#3b82f6'}} />
+                  </div>
+                  <div style={{width:48,textAlign:'right'}}><small>{count}</small></div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="panel">
+          <h3>Distribución por día de la semana</h3>
+          <div style={{display:'flex',flexDirection:'column',gap:6}}>
+            {['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map((label, i) => {
+              const count = days[i] || 0
+              const pct = Math.round((count / maxDay) * 100)
+              return (
+                <div key={label} style={{display:'flex',alignItems:'center',gap:8}}>
+                  <div style={{width:40}}><small>{label}</small></div>
+                  <div style={{flex:1,background:'#eee',height:12,borderRadius:6,overflow:'hidden'}}>
+                    <div style={{width:`${pct}%`,height:'100%',background:'#ef4444'}} />
+                  </div>
+                  <div style={{width:48,textAlign:'right'}}><small>{count}</small></div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Top reporters */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginTop:16}}>
+        <div className="panel">
+          <h3>Top 10 — Trabajadores</h3>
+          {topWorkers.length === 0 && <p className="muted">No hay datos de trabajadores.</p>}
+          <ol>
+            {topWorkers.map(([name, cnt]) => (
+              <li key={name}>{name} — {cnt}</li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="panel">
+          <h3>Top 10 — Vehículos</h3>
+          {topVehicles.length === 0 && <p className="muted">No hay datos de vehículos.</p>}
+          <ol>
+            {topVehicles.map(([plate, cnt]) => (
+              <li key={plate}>{plate} — {cnt}</li>
+            ))}
           </ol>
         </div>
       </div>

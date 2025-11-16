@@ -4,7 +4,8 @@ import MapPlaceholder from './components/MapPlaceholder'
 import Login from './components/Login'
 import Sidebar from './components/Sidebar'
 import Metrics from './components/Metrics'
-import VehiculosTrabajadores from './components/VehiculosTrabajadores'
+import Vehicles from './components/Vehicles'
+import Workers from './components/Workers'
 import TestCreateReport from './components/TestCreateReport'
 import { readAuth, clearAuth } from './utils/auth'
 import type { Report, Location as Loc, Auth } from './types'
@@ -111,6 +112,9 @@ export default function App(): JSX.Element {
         postalCode: r.postalCode || r.postal_code || '',
         location: r.location ? r.location : (r.latitude !== undefined && r.longitude !== undefined ? { lat: r.latitude, lng: r.longitude } : null),
         images: Array.isArray(r.images) ? r.images : (r.photo ? [r.photo] : []),
+        // normalize reporter relations: API may return different shapes/keys
+        reportedByVehicle: r.reportedByVehicle || r.reported_by_vehicle || r.vehicle || r.vehicleInfo || null,
+        reportedByWorker: r.reportedByWorker || r.reported_by_worker || r.worker || r.reportedBy || null,
         createdAt: r.createdAt || r.date || new Date().toISOString()
       }))
       setReports(normalized)
@@ -215,9 +219,15 @@ export default function App(): JSX.Element {
             </div>
           )}
 
-          {currentPage === 'vehiculos' && (
-            <div className="vehiculos-page">
-              <VehiculosTrabajadores />
+          {currentPage === 'vehicles' && (
+            <div className="vehicles-page">
+              <Vehicles />
+            </div>
+          )}
+
+          {currentPage === 'workers' && (
+            <div className="workers-page">
+              <Workers />
             </div>
           )}
 

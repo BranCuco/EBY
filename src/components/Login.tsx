@@ -43,12 +43,19 @@ export default function Login({ onLogin }: Props) {
       try { data = await res.json() } catch (_) { data = null }
 
       if (!res.ok) {
-        return setError(data?.message || `Error ${res.status}`)
+        // log full response for debugging (useful to inspect why some users fail)
+        console.error('Login failed', { status: res.status, body: data })
+        // Prefer a friendly message but include any server-provided message
+        const serverMsg = data?.message || data?.error || (typeof data === 'string' ? data : null)
+        return setError(serverMsg || `Error ${res.status}`)
       }
 
       const token = data?.token || data?.data?.token || data?.accessToken
       const userEmail = data?.user?.email || data?.data?.user?.email || username
-      if (!token) return setError('Token not returned from server')
+      if (!token) {
+        console.error('Login succeeded but token missing', { body: data })
+        return setError('Token not returned from server')
+      }
       const auth: Auth = { token, user: userEmail }
       writeAuth(auth)
       onLogin(auth)
